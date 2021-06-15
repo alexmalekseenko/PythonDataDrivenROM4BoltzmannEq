@@ -808,3 +808,13 @@ def read_grids(filename):
     savefile.close()
 
     return grids_cap_u, grids_cap_v, grids_cap_w, grids_u, grids_v, grids_w
+
+#######################################
+### save_moments(filename,moments_array)
+###
+### This subroutine write moments array on the hard drive in the csv format.
+###
+###
+def save_moments(filename,moments_array):
+    import numpy as np
+    np.savetxt(filename, moments_array, delimiter=',')
