@@ -818,3 +818,48 @@ def read_grids(filename):
 def save_moments(filename,moments_array):
     import numpy as np
     np.savetxt(filename, moments_array, delimiter=',')
+
+##########################################
+###  readromBkrnl (path)
+###
+### this subroutine reads the linear ROM kernel B in the ROM for Boltzmann
+##
+## returns: square matrix containing components of numpy array RomBKrnl and its size mm
+########################
+def readromBkrnl(path):
+    import numpy as np
+    # read the kernel from hard drive
+    savefile = open(path, 'rb')
+    # the first write is to record the number of singular vectors that are used in the kernel, say mm
+    # This number will determine the size of the rom B kernel matrix: mm x mm
+    # the size is the double integer (4 bytes) and each write in fortran ads 32 bits before and after the written staff.
+    # the first 32 bits contain the number of bytes in the record.
+    # so 4 bytes+4 bytes+ 4 bytes is 12
+    bytes = savefile.read(12)
+    # now that we got the first piece of information, let us unpack it using struct
+    import struct
+    data = struct.unpack('=lll', bytes)
+    scr1 = data[0]
+    mm = data[1]
+    scr2 = data[2]
+    # the second piece of information is a long integers that gives the number of
+    # singular vectors used to compute the B matrix. It also determines its size
+    # now we need to read the mm^2 double reals and form matrix B out of them
+    # 4 bytes padding, mm x mm x 8 bytes for the matrix entries and 4 bytes to close the write
+    # next we need to read mm^2 double reals into a sequence (not sure what it will be, list or tuple
+    bytes1 = savefile.read(4)
+    array_len = struct.unpack('=l', bytes1)  # this should be the length of the singular vector collision kernel array
+    num_rec = array_len[0] / 8  # this should be equal mm^2
+    # a quick consistency check
+    if mm**2 != (num_rec):
+        print("the numbers are inconsistent. Stop")
+        exit()
+    bytes = savefile.read(int(num_rec) * 8)
+    fmt = '=' + str(mm**2) + "d"
+    solscr = struct.unpack(fmt, bytes)
+    # next we convert the sequence into a numpy array to return it.
+    import numpy
+    ROMBkrnl = numpy.array(solscr).reshape(mm,mm)
+    # close the file
+    savefile.close()
+    return ROMBkrnl, mm
