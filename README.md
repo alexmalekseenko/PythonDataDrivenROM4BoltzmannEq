@@ -1,4 +1,4 @@
-# NeuralNets4BoltzmannEq
+# PythonDataDrivenRom4BoltzmannEq
 This project is a collection of Python Code covering a variety of tasks related to development of ROM for Boltzmann equation, 
 NN approximations for the Boltzmann collision integral and related questions. 
 
